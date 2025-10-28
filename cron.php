@@ -3,8 +3,14 @@
 
 // --- 設定 ---
 $uploadsDir = __DIR__ . '/uploads';
-$logFile = __DIR__ . '/logs/cron.log';
+$logsDir = __DIR__ . '/logs';
+$logFile = $logsDir . '/cron.log';
 $maxLifetime = 300; // 5 分鐘 = 300 秒
+
+// 確保日誌目錄存在
+if (!is_dir($logsDir)) {
+    mkdir($logsDir, 0755, true);
+}
 
 // --- 日誌函式 ---
 function write_log($message) {

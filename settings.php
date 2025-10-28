@@ -1,4 +1,4 @@
-{
+<?php die(); ?>{
     "cloudflare_turnstile_site_key": "",
     "cloudflare_turnstile_secret_key": "",
     "logo_url": "logo.png",

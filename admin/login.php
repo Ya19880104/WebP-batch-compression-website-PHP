@@ -2,8 +2,11 @@
 session_start();
 require_once __DIR__ . '/../config.php';
 
-// 讀取設定
-$settings = json_decode(file_get_contents(SETTINGS_FILE), true);
+// 讀取並解析設定檔
+$rawSettings = file_get_contents(SETTINGS_FILE);
+$jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
+$settings = json_decode($jsonSettings, true);
+
 $adminUsername = $settings['admin_username'];
 $adminPasswordMd5 = $settings['admin_password_md5'];
 

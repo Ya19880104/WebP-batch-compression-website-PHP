@@ -9,8 +9,17 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // 讀取目前的設定
-$settings = json_decode(file_get_contents(SETTINGS_FILE), true);
-$logFile = __DIR__ . '/../logs/cron.log';
+$rawSettings = file_get_contents(SETTINGS_FILE);
+$jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
+$settings = json_decode($jsonSettings, true);
+
+$logsDir = __DIR__ . '/../logs';
+$logFile = $logsDir . '/cron.log';
+
+// 確保日誌目錄存在
+if (!is_dir($logsDir)) {
+    mkdir($logsDir, 0755, true);
+}
 
 // 檢查日誌檔案是否存在，不存在則建立
 if (!file_exists($logFile)) {
@@ -61,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 在處理完所有 POST 請求後，統一寫入檔案
-    file_put_contents(SETTINGS_FILE, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    $newSettingsContent = '<?php die(); ?>' . json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    file_put_contents(SETTINGS_FILE, $newSettingsContent);
 }
 ?>
 

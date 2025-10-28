@@ -2,13 +2,13 @@
 // config.php
 
 // 網站設定檔案的路徑
-define('SETTINGS_FILE', __DIR__ . '/settings.json');
+define('SETTINGS_FILE', __DIR__ . '/settings.php');
 
 /*
  * --- 手動重設管理員密碼說明 ---
  * 如果您忘記了管理員密碼，可以透過以下步驟手動重設：
  *
- * 1. 打開 'settings.json' 檔案。
+ * 1. 打開 'settings.php' 檔案。
  * 2. 找到 "admin_username" 和 "admin_password_md5" 這兩個欄位。
  * 3. 將 "admin_username" 的值改為您想要的新帳號 (例如 "admin")。
  * 4. 將 "admin_password_md5" 的值改為您想要的新密碼的 MD5 雜湊值。

@@ -8,7 +8,10 @@ ini_set('display_errors', 0); // 在生產環境中應設為 0，錯誤記錄到
 header('Content-Type: application/json');
 
 // --- Cloudflare Turnstile 驗證 ---
-$settings = json_decode(file_get_contents(SETTINGS_FILE), true);
+$rawSettings = file_get_contents(SETTINGS_FILE);
+$jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
+$settings = json_decode($jsonSettings, true);
+
 $secretKey = $settings['cloudflare_turnstile_secret_key'];
 $response = ['success' => false, 'message' => '驗證失敗，請重試。'];
 
