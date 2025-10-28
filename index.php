@@ -25,7 +25,9 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 <input type="file" id="file-input" multiple accept="image/jpeg,image/png" style="display: none;">
             </div>
 
-            <div id="turnstile-widget"></div>
+            <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
+                <div id="turnstile-widget"></div>
+            <?php endif; ?>
 
             <div class="upload-btn-container">
                 <button id="convert-btn">立即轉換</button>
@@ -45,7 +47,9 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
         <?php echo $settings['footer_html']; ?>
     </footer>
 
+    <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <?php endif; ?>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const uploadArea = document.getElementById('upload-area');
@@ -180,11 +184,16 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
             });
 
             // 渲染 Turnstile 小工具
-            if (document.getElementById('turnstile-widget')) {
+            <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
+            if (typeof turnstile !== 'undefined' && document.getElementById('turnstile-widget')) {
                 turnstile.render('#turnstile-widget', {
                     sitekey: '<?php echo htmlspecialchars($settings['cloudflare_turnstile_site_key']); ?>',
+                    callback: function(token) {
+                        console.log("Turnstile token:", token);
+                    }
                 });
             }
+            <?php endif; ?>
         });
     </script>
 </body>

@@ -15,7 +15,7 @@ if (isset($data['session_id'])) {
     if (is_dir($sessionDir)) {
         // 遞迴刪除整個資料夾及其內容
         $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator($sessionDir, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
@@ -23,7 +23,7 @@ if (isset($data['session_id'])) {
             $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
             $todo($fileinfo->getRealPath());
         }
-        rmdir($dir);
+        rmdir($sessionDir);
     }
 }
 ?>
