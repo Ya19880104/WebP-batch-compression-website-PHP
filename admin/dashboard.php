@@ -57,12 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $settings['logo_url'] = $newLogoName;
         }
     }
-
-    // 將更新後的設定寫回檔案
-    file_put_contents(SETTINGS_FILE, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-    $message = "設定已成功儲存！";
+        $message = "設定已成功儲存！";
     }
+
+    // 在處理完所有 POST 請求後，統一寫入檔案
+    file_put_contents(SETTINGS_FILE, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 ?>
 
