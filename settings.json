@@ -3,5 +3,7 @@
     "cloudflare_turnstile_secret_key": "",
     "logo_url": "logo.png",
     "logo_link": "/",
-    "footer_html": "<p>&copy; 2024 Your Website. All rights reserved.</p>"
+    "footer_html": "<p>&copy; 2024 Your Website. All rights reserved.</p>",
+    "admin_username": "admin",
+    "admin_password_md5": "21232f297a57a5a743894a0e4a801fc3"
 }

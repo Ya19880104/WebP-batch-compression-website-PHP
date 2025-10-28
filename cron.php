@@ -4,7 +4,7 @@
 // --- 設定 ---
 $uploadsDir = __DIR__ . '/uploads';
 $logFile = __DIR__ . '/logs/cron.log';
-$maxLifetime = 3600; // 1 小時 = 3600 秒
+$maxLifetime = 300; // 5 分鐘 = 300 秒
 
 // --- 日誌函式 ---
 function write_log($message) {
