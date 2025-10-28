@@ -9,7 +9,8 @@ $settings = json_decode($jsonSettings, true);
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>WebP 圖片轉換器</title>
+    <title><?php echo htmlspecialchars($settings['seo_title']); ?></title>
+    <meta name="description" content="<?php echo htmlspecialchars($settings['seo_description']); ?>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,6 +23,12 @@ $settings = json_decode($jsonSettings, true);
         </header>
 
         <main>
+            <?php if (!empty($settings['banner_top_image'])): ?>
+                <div class="banner-container" id="banner-top">
+                    <img src="<?php echo htmlspecialchars($settings['banner_top_image']); ?>" alt="Top Banner">
+                </div>
+            <?php endif; ?>
+
             <div id="upload-area">
                 <p>將圖片拖曳到此處，或點擊以選擇檔案</p>
                 <p style="font-size: 0.8em; color: #888;">(最多 20 個檔案，僅支援 JPG/PNG)</p>
@@ -54,11 +61,17 @@ $settings = json_decode($jsonSettings, true);
             <div class="batch-download-container" style="display: none;">
                 <button id="batch-download-btn">批次壓縮下載</button>
             </div>
+
+            <?php if (!empty($settings['banner_bottom_image'])): ?>
+                <div class="banner-container" id="banner-bottom">
+                    <img src="<?php echo htmlspecialchars($settings['banner_bottom_image']); ?>" alt="Bottom Banner">
+                </div>
+            <?php endif; ?>
         </main>
     </div>
 
     <footer>
-        <?php echo $settings['footer_html']; ?>
+        <p>&copy; <?php echo date('Y'); ?> <a href="<?php echo htmlspecialchars($settings['footer_link']); ?>" target="_blank"><?php echo htmlspecialchars($settings['footer_text']); ?></a>. All rights reserved.</p>
     </footer>
 
     <script>

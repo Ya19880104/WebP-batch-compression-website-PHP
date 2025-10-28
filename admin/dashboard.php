@@ -54,18 +54,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['update_settings'])) {
         $settings['cloudflare_turnstile_site_key'] = $_POST['cloudflare_turnstile_site_key'] ?? '';
         $settings['cloudflare_turnstile_secret_key'] = $_POST['cloudflare_turnstile_secret_key'] ?? '';
+
+        $settings['seo_title'] = $_POST['seo_title'] ?? '';
+        $settings['seo_description'] = $_POST['seo_description'] ?? '';
+
         $settings['logo_link'] = $_POST['logo_link'] ?? '';
-        $settings['footer_html'] = $_POST['footer_html'] ?? '';
+
+        $settings['footer_text'] = $_POST['footer_text'] ?? '';
+        $settings['footer_link'] = $_POST['footer_link'] ?? '';
+
+        $img_dir = __DIR__ . '/../img';
 
         // 處理 LOGO 上傳
         if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] == UPLOAD_ERR_OK) {
-            // 為避免瀏覽器快取，使用時間戳記作為檔名
-            $newLogoName = 'logo.png?v=' . time();
-            $logoUploadPath = __DIR__ . '/../logo.png';
+            $logoUploadPath = $img_dir . '/logo.png';
             if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $logoUploadPath)) {
-                $settings['logo_url'] = $newLogoName;
+                $settings['logo_url'] = 'img/logo.png?v=' . time();
             }
         }
+
+        // 處理上方 Banner 上傳
+        if (isset($_FILES['banner_top_file']) && $_FILES['banner_top_file']['error'] == UPLOAD_ERR_OK) {
+            $bannerTopUploadPath = $img_dir . '/banner_top.png';
+            if (move_uploaded_file($_FILES['banner_top_file']['tmp_name'], $bannerTopUploadPath)) {
+                $settings['banner_top_image'] = 'img/banner_top.png?v=' . time();
+            }
+        }
+
+        // 處理下方 Banner 上傳
+        if (isset($_FILES['banner_bottom_file']) && $_FILES['banner_bottom_file']['error'] == UPLOAD_ERR_OK) {
+            $bannerBottomUploadPath = $img_dir . '/banner_bottom.png';
+            if (move_uploaded_file($_FILES['banner_bottom_file']['tmp_name'], $bannerBottomUploadPath)) {
+                $settings['banner_bottom_image'] = 'img/banner_bottom.png?v=' . time();
+            }
+        }
+
         $message = "設定已成功儲存！";
     }
 
@@ -166,16 +189,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="cloudflare_turnstile_secret_key">Secret Key:</label>
             <input type="text" id="cloudflare_turnstile_secret_key" name="cloudflare_turnstile_secret_key" value="<?php echo htmlspecialchars($settings['cloudflare_turnstile_secret_key']); ?>">
 
+            <h2>SEO 設定</h2>
+            <label for="seo_title">網站標題 (Title):</label>
+            <input type="text" id="seo_title" name="seo_title" value="<?php echo htmlspecialchars($settings['seo_title']); ?>">
+
+            <label for="seo_description">網站描述 (Description):</label>
+            <textarea id="seo_description" name="seo_description" style="height: 80px;"><?php echo htmlspecialchars($settings['seo_description']); ?></textarea>
+
             <h2>LOGO 設定</h2>
             <label for="logo_link">LOGO 超連結:</label>
             <input type="text" id="logo_link" name="logo_link" value="<?php echo htmlspecialchars($settings['logo_link']); ?>">
 
-            <label for="logo_file">上傳新的 LOGO (只接受.png):</label>
-            <input type="file" id="logo_file" name="logo_file" accept="image/png">
+            <label for="logo_file">上傳新的 LOGO (建議 .png 格式):</label>
+            <input type="file" id="logo_file" name="logo_file" accept="image/*">
+            <p style="font-size: 0.8em; color: #888;">目前 LOGO 路徑: <?php echo htmlspecialchars($settings['logo_url']); ?></p>
+
+            <h2>廣告 Banner 設定</h2>
+            <label for="banner_top_file">上方廣告 Banner (建議 .png 格式):</label>
+            <input type="file" id="banner_top_file" name="banner_top_file" accept="image/*">
+            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_top_image']); ?></p>
+
+            <label for="banner_bottom_file">下方廣告 Banner (建議 .png 格式):</label>
+            <input type="file" id="banner_bottom_file" name="banner_bottom_file" accept="image/*">
+            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_bottom_image']); ?></p>
 
             <h2>Footer 設定</h2>
-            <label for="footer_html">Footer HTML 內容:</label>
-            <textarea id="footer_html" name="footer_html"><?php echo htmlspecialchars($settings['footer_html']); ?></textarea>
+            <label for="footer_text">Footer 文字:</label>
+            <input type="text" id="footer_text" name="footer_text" value="<?php echo htmlspecialchars($settings['footer_text']); ?>">
+
+            <label for="footer_link">Footer 連結:</label>
+            <input type="text" id="footer_link" name="footer_link" value="<?php echo htmlspecialchars($settings['footer_link']); ?>">
 
             <br>
             <input type="submit" name="update_settings" value="儲存設定">

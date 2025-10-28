@@ -129,3 +129,14 @@ footer a {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 5px;
 }
+
+.banner-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.banner-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}

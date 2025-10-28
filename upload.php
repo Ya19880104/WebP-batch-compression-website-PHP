@@ -13,14 +13,46 @@ $jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
 $settings = json_decode($jsonSettings, true);
 
 // --- Cloudflare Turnstile 驗證 ---
+$turnstile_verified = false;
 $secretKey = $settings['cloudflare_turnstile_secret_key'];
-$response = ['success' => false, 'message' => '驗證失敗，請重試。'];
-if (isset($_POST['cf-turnstile-response']) && !empty($secretKey)) {
-    // ... (Turnstile 驗證邏輯省略以保持簡潔)
+
+// 如果沒有設定 Secret Key，則直接跳過驗證
+if (empty($secretKey)) {
+    $turnstile_verified = true;
+}
+// 如果設定了 Secret Key，但前端沒有回傳 token，則視為失敗
+elseif (!isset($_POST['cf-turnstile-response'])) {
+    $turnstile_verified = false;
+    $response = ['success' => false, 'message' => '缺少 Turnstile Token，請重新整理頁面。'];
+    echo json_encode($response);
+    exit;
+}
+// 執行驗證
+else {
+    $token = $_POST['cf-turnstile-response'];
+    $ip = $_SERVER['REMOTE_ADDR'];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://challenges.cloudflare.com/turnstile/v0/siteverify");
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['secret' => $secretKey, 'response' => $token, 'remoteip' => $ip]));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $api_response = curl_exec($ch);
+    curl_close($ch);
+
+    $api_data = json_decode($api_response, true);
+    if (isset($api_data['success']) && $api_data['success']) {
+        $turnstile_verified = true;
+    } else {
+        $response = ['success' => false, 'message' => 'Cloudflare Turnstile 驗證失敗。'];
+        echo json_encode($response);
+        exit;
+    }
 }
 
+
 // --- 處理檔案上傳 ---
-if (isset($_FILES['images'])) {
+if ($turnstile_verified && isset($_FILES['images'])) {
     $sessionId = uniqid('upload_');
     $sessionDir = __DIR__ . '/uploads/' . $sessionId;
     if (!is_dir($sessionDir)) {
