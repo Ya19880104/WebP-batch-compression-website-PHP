@@ -1,6 +1,9 @@
 <?php
 require_once 'config.php';
-$settings = json_decode(file_get_contents(SETTINGS_FILE), true);
+// 讀取並解析設定檔
+$rawSettings = file_get_contents(SETTINGS_FILE);
+$jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
+$settings = json_decode($jsonSettings, true);
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">

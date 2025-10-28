@@ -54,18 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['update_settings'])) {
         $settings['cloudflare_turnstile_site_key'] = $_POST['cloudflare_turnstile_site_key'] ?? '';
         $settings['cloudflare_turnstile_secret_key'] = $_POST['cloudflare_turnstile_secret_key'] ?? '';
-    $settings['logo_link'] = $_POST['logo_link'] ?? '';
-    $settings['footer_html'] = $_POST['footer_html'] ?? '';
+        $settings['logo_link'] = $_POST['logo_link'] ?? '';
+        $settings['footer_html'] = $_POST['footer_html'] ?? '';
 
-    // 處理 LOGO 上傳
-    if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] == UPLOAD_ERR_OK) {
-        // 為避免瀏覽器快取，使用時間戳記作為檔名
-        $newLogoName = 'logo.png?v=' . time();
-        $logoUploadPath = __DIR__ . '/../logo.png';
-        if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $logoUploadPath)) {
-            $settings['logo_url'] = $newLogoName;
+        // 處理 LOGO 上傳
+        if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] == UPLOAD_ERR_OK) {
+            // 為避免瀏覽器快取，使用時間戳記作為檔名
+            $newLogoName = 'logo.png?v=' . time();
+            $logoUploadPath = __DIR__ . '/../logo.png';
+            if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $logoUploadPath)) {
+                $settings['logo_url'] = $newLogoName;
+            }
         }
-    }
         $message = "設定已成功儲存！";
     }
 
