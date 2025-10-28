@@ -1,0 +1,128 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    flex: 1;
+}
+
+header {
+    padding: 20px 0;
+    border-bottom: 1px solid #333;
+}
+
+header .logo img {
+    max-height: 50px;
+}
+
+main {
+    padding: 20px 0;
+}
+
+#upload-area {
+    border: 2px dashed #555;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #1e1e1e;
+    transition: background-color 0.3s;
+}
+
+#upload-area.drag-over {
+    background-color: #333;
+    border-color: #777;
+}
+
+#upload-area p {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.upload-btn-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#convert-btn {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#download-list {
+    margin-top: 30px;
+}
+
+.download-item {
+    display: flex;
+    align-items: center;
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.download-item img {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.download-item .file-info {
+    flex-grow: 1;
+}
+
+.download-item .download-link {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.batch-download-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#batch-download-btn {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+footer {
+    padding: 20px 0;
+    margin-top: auto;
+    text-align: center;
+    border-top: 1px solid #333;
+    font-size: 0.9em;
+}
+
+footer a {
+    color: #007bff;
+}
+
+#turnstile-widget {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}

@@ -1,0 +1,7 @@
+{
+    "cloudflare_turnstile_site_key": "",
+    "cloudflare_turnstile_secret_key": "",
+    "logo_url": "logo.png",
+    "logo_link": "/",
+    "footer_html": "<p>&copy; 2024 Your Website. All rights reserved.</p>"
+}
