@@ -33,10 +33,14 @@ $settings = json_decode($jsonSettings, true);
             <?php endif; ?>
 
             <div class="options-container" style="text-align: center; margin-top: 20px;">
-                <label for="resize-checkbox">
-                    <input type="checkbox" id="resize-checkbox" name="resize">
-                    將圖片最大尺寸限制為 2480px
-                </label>
+                <p style="margin-bottom: 10px;">圖片尺寸選項：</p>
+                <div id="resize-options" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;">
+                    <label><input type="radio" name="resize" value="none" checked> 原始尺寸</label>
+                    <label><input type="radio" name="resize" value="2480"> 2480px</label>
+                    <label><input type="radio" name="resize" value="1920"> 1920px</label>
+                    <label><input type="radio" name="resize" value="600"> 600px</label>
+                    <label><input type="radio" name="resize" value="600_crop"> 600px (置中裁切)</label>
+                </div>
             </div>
 
             <div class="upload-btn-container">
@@ -140,8 +144,8 @@ $settings = json_decode($jsonSettings, true);
                     formData.append('images[]', file);
                 });
 
-                const resizeCheckbox = document.getElementById('resize-checkbox');
-                formData.append('resize', resizeCheckbox.checked);
+                const selectedResizeOption = document.querySelector('input[name="resize"]:checked');
+                formData.append('resize', selectedResizeOption.value);
 
                 const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
                 if (turnstileResponse) {

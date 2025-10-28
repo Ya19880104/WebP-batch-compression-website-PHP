@@ -154,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br>
             <input type="submit" name="update_credentials" value="更新憑證">
         </form>
+        <p style="font-size: 0.8em; color: #888; margin-top: 10px;">安全建議：為了加強伺服器層級的安全性，建議將網站根目錄下的 `settings.php` 檔案權限設定為 `640`。</p>
         <hr>
 
         <form action="dashboard.php" method="post" enctype="multipart/form-data">
