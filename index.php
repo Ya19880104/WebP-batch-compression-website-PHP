@@ -29,6 +29,13 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 <div id="turnstile-widget"></div>
             <?php endif; ?>
 
+            <div class="options-container" style="text-align: center; margin-top: 20px;">
+                <label for="resize-checkbox">
+                    <input type="checkbox" id="resize-checkbox" name="resize">
+                    將圖片最大尺寸限制為 2480px
+                </label>
+            </div>
+
             <div class="upload-btn-container">
                 <button id="convert-btn">立即轉換</button>
             </div>
@@ -47,10 +54,32 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
         <?php echo $settings['footer_html']; ?>
     </footer>
 
-    <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <?php endif; ?>
     <script>
+        // --- Turnstile Onload Callback ---
+        function renderTurnstileWidget() {
+            console.log('Cloudflare script loaded. renderTurnstileWidget() is called.');
+            if (typeof turnstile !== 'undefined' && document.getElementById('turnstile-widget')) {
+                console.log('Turnstile object is available. Calling render...');
+                try {
+                    turnstile.render('#turnstile-widget', {
+                        sitekey: '<?php echo htmlspecialchars($settings['cloudflare_turnstile_site_key']); ?>',
+                        callback: function(token) {
+                            console.log("Turnstile challenge completed. Token received.");
+                        },
+                        'error-callback': function() {
+                            console.error('Turnstile challenge failed.');
+                        }
+                    });
+                    console.log('Turnstile render function was called.');
+                } catch (e) {
+                    console.error('An error occurred while rendering Turnstile:', e);
+                }
+            } else {
+                console.error('Turnstile object not found or widget container is missing.');
+            }
+        }
+
+        // --- Main Application Logic ---
         document.addEventListener('DOMContentLoaded', function () {
             const uploadArea = document.getElementById('upload-area');
             const fileInput = document.getElementById('file-input');
@@ -59,10 +88,8 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
             const batchDownloadContainer = document.querySelector('.batch-download-container');
             let filesToUpload = [];
 
-            // 觸發檔案選擇
             uploadArea.addEventListener('click', () => fileInput.click());
 
-            // 處理拖曳事件
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 uploadArea.classList.add('drag-over');
@@ -76,25 +103,21 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 handleFiles(e.dataTransfer.files);
             });
 
-            // 處理檔案選擇事件
             fileInput.addEventListener('change', (e) => {
                 handleFiles(e.target.files);
             });
 
             function handleFiles(files) {
                 const newFiles = Array.from(files).filter(file => ['image/jpeg', 'image/png'].includes(file.type));
-
                 if (filesToUpload.length + newFiles.length > 20) {
                     alert('上傳總數不能超過 20 個檔案。');
                     return;
                 }
-
                 filesToUpload.push(...newFiles);
                 updateFileList();
             }
 
             function updateFileList() {
-                // 在此可以加入一個預覽列表，但為求簡潔，暫時只更新提示文字
                 const p = uploadArea.querySelector('p');
                 if (filesToUpload.length > 0) {
                     p.textContent = `已選擇 ${filesToUpload.length} 個檔案。`;
@@ -103,7 +126,6 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 }
             }
 
-            // 轉換按鈕點擊事件
             convertBtn.addEventListener('click', () => {
                 if (filesToUpload.length === 0) {
                     alert('請先選擇要轉換的圖片。');
@@ -115,7 +137,9 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                     formData.append('images[]', file);
                 });
 
-                // 加入 Turnstile response
+                const resizeCheckbox = document.getElementById('resize-checkbox');
+                formData.append('resize', resizeCheckbox.checked);
+
                 const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
                 if (turnstileResponse) {
                     formData.append('cf-turnstile-response', turnstileResponse.value);
@@ -130,9 +154,8 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 })
                 .then(response => response.json())
                 .then(data => {
-                    downloadList.innerHTML = ''; // 清空舊列表
+                    downloadList.innerHTML = '';
                     if (data.success) {
-                        // 註冊頁面卸載事件以進行清理
                         window.addEventListener('beforeunload', () => {
                             if (data.sessionId) {
                                 const payload = JSON.stringify({ session_id: data.sessionId });
@@ -164,7 +187,7 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                         }
 
                     } else {
-                        alert('轉換失敗：' + data.message);
+                        alert('轉換失敗：' + (data.message || '未知錯誤'));
                     }
                 })
                 .catch(error => {
@@ -174,27 +197,19 @@ $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
                 .finally(() => {
                     convertBtn.textContent = '立即轉換';
                     convertBtn.disabled = false;
-                    filesToUpload = []; // 清空已上傳的檔案
+                    filesToUpload = [];
                     updateFileList();
-                    // 重設 Turnstile
+                    <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
                     if (window.turnstile) {
                         window.turnstile.reset();
                     }
+                    <?php endif; ?>
                 });
             });
-
-            // 渲染 Turnstile 小工具
-            <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
-            if (typeof turnstile !== 'undefined' && document.getElementById('turnstile-widget')) {
-                turnstile.render('#turnstile-widget', {
-                    sitekey: '<?php echo htmlspecialchars($settings['cloudflare_turnstile_site_key']); ?>',
-                    callback: function(token) {
-                        console.log("Turnstile token:", token);
-                    }
-                });
-            }
-            <?php endif; ?>
         });
     </script>
+    <?php if (!empty($settings['cloudflare_turnstile_site_key'])): ?>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=renderTurnstileWidget" async defer></script>
+    <?php endif; ?>
 </body>
 </html>

@@ -80,12 +80,48 @@ if (isset($_FILES['images'])) {
                         $image = imagecreatefromjpeg($originalImagePath);
                     } elseif ($fileExtension == 'png') {
                         $image = imagecreatefrompng($originalImagePath);
-                        imagepalettetotruecolor($image);
-                        imagealphablending($image, true);
-                        imagesavealpha($image, true);
                     }
 
                     if ($image !== null) {
+                        // --- 圖片縮放邏輯 ---
+                        $shouldResize = isset($_POST['resize']) && $_POST['resize'] === 'true';
+                        $maxWidth = 2480;
+                        $maxHeight = 2480;
+                        $width = imagesx($image);
+                        $height = imagesy($image);
+
+                        if ($shouldResize && ($width > $maxWidth || $height > $maxHeight)) {
+                            $ratio = $width / $height;
+                            if ($width > $height) {
+                                $newWidth = $maxWidth;
+                                $newHeight = $maxWidth / $ratio;
+                            } else {
+                                $newHeight = $maxHeight;
+                                $newWidth = $maxHeight * $ratio;
+                            }
+
+                            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+                            // 處理 PNG 透明背景
+                            if ($fileExtension == 'png') {
+                                imagealphablending($resizedImage, false);
+                                imagesavealpha($resizedImage, true);
+                                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+                            }
+
+                            imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                            imagedestroy($image); // 釋放舊圖片資源
+                            $image = $resizedImage; // 將指標指向新圖片
+                        }
+
+                        // --- 儲存為 WebP ---
+                        if ($fileExtension == 'png') {
+                            imagepalettetotruecolor($image);
+                            imagealphablending($image, true);
+                            imagesavealpha($image, true);
+                        }
+
                         if (imagewebp($image, $webpImagePath, 80)) {
                             $uploadedFiles[] = [
                                 'original' => $fileName,

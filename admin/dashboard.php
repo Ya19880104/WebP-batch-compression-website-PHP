@@ -10,6 +10,14 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // 讀取目前的設定
 $settings = json_decode(file_get_contents(SETTINGS_FILE), true);
+$logFile = __DIR__ . '/../logs/cron.log';
+
+// 處理清除日誌的請求
+if (isset($_GET['action']) && $_GET['action'] === 'clear_log' && file_exists($logFile)) {
+    file_put_contents($logFile, '');
+    header('Location: dashboard.php#cron-log-section');
+    exit;
+}
 
 // 處理表單提交
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -99,7 +107,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p><strong>CRON 指令範例 (每 10 分鐘):</strong></p>
         <pre style="background-color: #eee; padding: 10px; border-radius: 5px;">*/10 * * * * curl --silent "<?php echo htmlspecialchars($cronUrl); ?>" > /dev/null 2>&1</pre>
 
-        <br>
+        <hr style="margin: 30px 0;">
+
+        <h2 id="cron-log-section">CRON 執行日誌</h2>
+        <textarea readonly style="width: 100%; height: 300px; background-color: #eee;"><?php
+            if (file_exists($logFile)) {
+                echo htmlspecialchars(file_get_contents($logFile));
+            } else {
+                echo "日誌檔案不存在。";
+            }
+        ?></textarea>
+        <a href="dashboard.php?action=clear_log" onclick="return confirm('您確定要清除所有日誌嗎？');" style="display: inline-block; margin-top: 10px;">清除日誌</a>
+
+        <br><br>
         <a href="logout.php">登出</a>
     </div>
 </body>
