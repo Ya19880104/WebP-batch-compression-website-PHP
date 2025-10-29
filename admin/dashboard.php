@@ -36,13 +36,59 @@ if (isset($_GET['action']) && $_GET['action'] === 'clear_log' && file_exists($lo
     exit;
 }
 
+// 處理移除圖片的請求
+if (isset($_GET['action']) && $_GET['action'] === 'remove_image' && isset($_GET['type'])) {
+    $type = $_GET['type'];
+    $img_dir = __DIR__ . '/../img';
+    $setting_key_image = null;
+    $setting_key_link = null;
+    $baseName = null;
+
+    if ($type === 'banner_top') {
+        $setting_key_image = 'banner_top_image';
+        $setting_key_link = 'banner_top_link';
+        $baseName = 'banner_top';
+    } elseif ($type === 'banner_bottom') {
+        $setting_key_image = 'banner_bottom_image';
+        $setting_key_link = 'banner_bottom_link';
+        $baseName = 'banner_bottom';
+    } elseif ($type === 'og_image') {
+        $setting_key_image = 'seo_og_image';
+        $baseName = 'og_image';
+    }
+
+    if ($baseName) {
+        // 刪除實體檔案
+        $files = glob($img_dir . '/' . $baseName . '.*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+
+        // 更新設定
+        $settings[$setting_key_image] = '';
+        if (isset($settings[$setting_key_link])) {
+            $settings[$setting_key_link] = '';
+        }
+
+        $newSettingsContent = '<?php die(); ?>' . json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents(SETTINGS_FILE, $newSettingsContent);
+
+        // 重新導向回儀表板
+        header('Location: dashboard.php');
+        exit;
+    }
+}
+
+
 /**
  * 處理圖片上傳的輔助函數
- * @param array $file POST されたファイルの情報 (e.g., $_FILES['logo_file'])
- * @param string $baseName 保存する際の基本ファイル名 (e.g., 'logo')
- * @param string $settingsKey 更新する設定のキー (e.g., 'logo_url')
- * @param array &$settings 設定を格納する配列 (参照渡し)
- * @param string $imgDir 画像を保存するディレクトリ
+ * @param array $file 從 $_FILES 傳遞過來的檔案資訊 (例如 $_FILES['logo_file'])
+ * @param string $baseName 儲存檔案時的基本名稱 (例如 'logo')
+ * @param string $settingsKey 要更新的設定檔中的鍵名 (例如 'logo_url')
+ * @param array &$settings 包含所有設定的陣列 (以引用方式傳遞)
+ * @param string $imgDir 圖片儲存的目錄路徑
  */
 function handle_image_upload($file, $baseName, $settingsKey, &$settings, $imgDir) {
     if (isset($file) && $file['error'] == UPLOAD_ERR_OK) {
@@ -81,7 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $settings['admin_username'] = $newUsername;
         if (!empty($newPassword)) {
-            $settings['admin_password_md5'] = md5($newPassword);
+            // 使用 password_hash 產生安全的密碼雜湊
+            $settings['admin_password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            // 移除舊的不安全的 md5 密碼
+            unset($settings['admin_password_md5']);
         }
         $message = "使用者憑證已成功更新！";
 
@@ -95,6 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $settings['logo_link'] = $_POST['logo_link'] ?? '';
 
+        $settings['banner_top_link'] = $_POST['banner_top_link'] ?? '';
+        $settings['banner_bottom_link'] = $_POST['banner_bottom_link'] ?? '';
+
         $settings['footer_text'] = $_POST['footer_text'] ?? '';
         $settings['footer_link'] = $_POST['footer_link'] ?? '';
 
@@ -104,6 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         handle_image_upload($_FILES['logo_file'], 'logo', 'logo_url', $settings, $img_dir);
         handle_image_upload($_FILES['banner_top_file'], 'banner_top', 'banner_top_image', $settings, $img_dir);
         handle_image_upload($_FILES['banner_bottom_file'], 'banner_bottom', 'banner_bottom_image', $settings, $img_dir);
+        handle_image_upload($_FILES['seo_og_image_file'], 'og_image', 'seo_og_image', $settings, $img_dir);
 
         $message = "設定已成功儲存！";
     }
@@ -212,6 +265,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="seo_description">網站描述 (Description):</label>
             <textarea id="seo_description" name="seo_description" style="height: 80px;"><?php echo htmlspecialchars($settings['seo_description']); ?></textarea>
 
+            <label for="seo_og_image_file" style="margin-top: 25px;">OG Image (建議 1200x630px):</label>
+            <input type="file" id="seo_og_image_file" name="seo_og_image_file" accept="image/jpeg,image/png,image/webp">
+            <p style="font-size: 0.8em; color: #888;">
+                建議使用英文檔案名稱。目前圖片路徑: <?php echo htmlspecialchars($settings['seo_og_image']); ?>
+                <?php if (!empty($settings['seo_og_image'])): ?>
+                    <a href="?action=remove_image&type=og_image" onclick="return confirm('您確定要移除 OG Image 嗎？');" style="color: #ff4d4d; margin-left: 10px;">移除圖片</a>
+                <?php endif; ?>
+            </p>
+
             <h2>LOGO 設定</h2>
             <label for="logo_link">LOGO 超連結:</label>
             <input type="text" id="logo_link" name="logo_link" value="<?php echo htmlspecialchars($settings['logo_link']); ?>">
@@ -223,11 +285,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2>廣告 Banner 設定</h2>
             <label for="banner_top_file">上方廣告 Banner (支援 JPG, PNG, WEBP):</label>
             <input type="file" id="banner_top_file" name="banner_top_file" accept="image/jpeg,image/png,image/webp">
-            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_top_image']); ?></p>
+            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_top_image']); ?>
+                <?php if (!empty($settings['banner_top_image'])): ?>
+                    <a href="?action=remove_image&type=banner_top" onclick="return confirm('您確定要移除上方廣告 Banner 嗎？');" style="color: #ff4d4d; margin-left: 10px;">移除圖片</a>
+                <?php endif; ?>
+            </p>
+            <label for="banner_top_link">上方廣告 Banner 超連結:</label>
+            <input type="text" id="banner_top_link" name="banner_top_link" value="<?php echo htmlspecialchars($settings['banner_top_link']); ?>">
 
-            <label for="banner_bottom_file">下方廣告 Banner (支援 JPG, PNG, WEBP):</label>
+            <label for="banner_bottom_file" style="margin-top: 25px;">下方廣告 Banner (支援 JPG, PNG, WEBP):</label>
             <input type="file" id="banner_bottom_file" name="banner_bottom_file" accept="image/jpeg,image/png,image/webp">
-            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_bottom_image']); ?></p>
+            <p style="font-size: 0.8em; color: #888;">目前圖片路徑: <?php echo htmlspecialchars($settings['banner_bottom_image']); ?>
+                <?php if (!empty($settings['banner_bottom_image'])): ?>
+                    <a href="?action=remove_image&type=banner_bottom" onclick="return confirm('您確定要移除下方廣告 Banner 嗎？');" style="color: #ff4d4d; margin-left: 10px;">移除圖片</a>
+                <?php endif; ?>
+            </p>
+            <label for="banner_bottom_link">下方廣告 Banner 超連結:</label>
+            <input type="text" id="banner_bottom_link" name="banner_bottom_link" value="<?php echo htmlspecialchars($settings['banner_bottom_link']); ?>">
 
             <h2>Footer 設定</h2>
             <label for="footer_text">Footer 文字:</label>

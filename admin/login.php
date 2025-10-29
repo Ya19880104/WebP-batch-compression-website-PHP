@@ -8,15 +8,29 @@ $jsonSettings = substr($rawSettings, strpos($rawSettings, '{'));
 $settings = json_decode($jsonSettings, true);
 
 $adminUsername = $settings['admin_username'];
-$adminPasswordMd5 = $settings['admin_password_md5'];
+$adminPasswordHash = $settings['admin_password_hash'] ?? null;
+$adminPasswordMd5 = $settings['admin_password_md5'] ?? null; // For fallback
 
 // 檢查是否為 POST 請求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    // 驗證使用者名稱和密碼 (將提交的密碼轉為 MD5 後比對)
-    if ($username === $adminUsername && md5($password) === $adminPasswordMd5) {
+    $loginSuccess = false;
+
+    // 優先使用 password_verify (更安全)
+    if (isset($adminPasswordHash)) {
+        if ($username === $adminUsername && password_verify($password, $adminPasswordHash)) {
+            $loginSuccess = true;
+        }
+    // 如果 password_hash 不存在，則回退到舊的 MD5 驗證 (用於過渡期)
+    } elseif (isset($adminPasswordMd5)) {
+        if ($username === $adminUsername && md5($password) === $adminPasswordMd5) {
+            $loginSuccess = true;
+        }
+    }
+
+    if ($loginSuccess) {
         // 登入成功，設定 session
         $_SESSION['loggedin'] = true;
         header('Location: dashboard.php');

@@ -11,6 +11,14 @@ $settings = json_decode($jsonSettings, true);
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($settings['seo_title']); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($settings['seo_description']); ?>">
+    <?php if (!empty($settings['seo_og_image'])): ?>
+        <meta property="og:image" content="<?php
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $domain = $_SERVER['HTTP_HOST'];
+            $ogImageUrl = $protocol . $domain . '/' . htmlspecialchars($settings['seo_og_image']);
+            echo $ogImageUrl;
+        ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,7 +33,13 @@ $settings = json_decode($jsonSettings, true);
         <main>
             <?php if (!empty($settings['banner_top_image'])): ?>
                 <div class="banner-container" id="banner-top">
-                    <img src="<?php echo htmlspecialchars($settings['banner_top_image']); ?>" alt="Top Banner">
+                    <?php if (!empty($settings['banner_top_link'])): ?>
+                        <a href="<?php echo htmlspecialchars($settings['banner_top_link']); ?>" target="_blank">
+                            <img src="<?php echo htmlspecialchars($settings['banner_top_image']); ?>" alt="Top Banner">
+                        </a>
+                    <?php else: ?>
+                        <img src="<?php echo htmlspecialchars($settings['banner_top_image']); ?>" alt="Top Banner">
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 
@@ -64,7 +78,13 @@ $settings = json_decode($jsonSettings, true);
 
             <?php if (!empty($settings['banner_bottom_image'])): ?>
                 <div class="banner-container" id="banner-bottom">
-                    <img src="<?php echo htmlspecialchars($settings['banner_bottom_image']); ?>" alt="Bottom Banner">
+                    <?php if (!empty($settings['banner_bottom_link'])): ?>
+                        <a href="<?php echo htmlspecialchars($settings['banner_bottom_link']); ?>" target="_blank">
+                            <img src="<?php echo htmlspecialchars($settings['banner_bottom_image']); ?>" alt="Bottom Banner">
+                        </a>
+                    <?php else: ?>
+                        <img src="<?php echo htmlspecialchars($settings['banner_bottom_image']); ?>" alt="Bottom Banner">
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </main>
