@@ -3,7 +3,8 @@
 
 白牌WEBP網站<br>
 PHP專案，任何PHP主機皆可以使用，僅注意權限問題即可<br>
-可SEO，可置入性廣告BANNER<br>
-預設帳號密碼為 admin，儲存後為加密後的雜湊值，但仍建議對 setting.php 檔案改為 640或禁止外部存取
+可SEO，可置入性廣告BANNER
 
-管理員網址 /admin
+管理員網址 /admin<br>
+預設帳號密碼為 admin<br>
+密碼儲存後為加密後的雜湊值，但仍建議對 setting.php 檔案改為640或禁止外部存取
