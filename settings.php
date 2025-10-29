@@ -2,7 +2,7 @@
     "cloudflare_turnstile_site_key": "",
     "cloudflare_turnstile_secret_key": "",
     "admin_username": "admin",
-    "admin_password_hash": "$2y$10$9.p2h.F1gX.V9w.Yg8.U6.6JcW3.2eT7.1uE0.V9y.9i.K2.eT7.W",
+    "admin_password_hash": "$2y$10$WT3xHjwhDz62jVkX4LBc3uynsgMmuinN8pVM9bnbEN.6vIdqPdnK2",
     "seo_title": "WEBP 圖片壓縮轉檔工具",
     "seo_description": "這是一個 WEBP 圖片壓縮轉檔工具，可以快速將 JPG、PNG 等格式的圖片轉換為 WEBP 格式，並提供多種尺寸選擇。",
     "seo_og_image": "",
