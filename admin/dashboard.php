@@ -122,48 +122,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // --- 處理使用者管理表單 ---
     if (isset($_POST['update_credentials'])) {
-        $newUsername = $_POST['admin_username'] ?? 'admin';
+        $newUsername = $_POST['admin_username'] ?? $settings['admin_username'];
         $newPassword = $_POST['admin_password'] ?? '';
 
         $settings['admin_username'] = $newUsername;
         if (!empty($newPassword)) {
-            // 使用 password_hash 產生安全的密碼雜湊
             $settings['admin_password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
-            // 移除舊的不安全的 md5 密碼
             unset($settings['admin_password_md5']);
         }
+
+        // 儲存設定並設定成功訊息
+        $newSettingsContent = '<?php die(); ?>' . json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents(SETTINGS_FILE, $newSettingsContent);
         $message = "使用者憑證已成功更新！";
+    }
 
     // --- 處理主要設定表單 ---
-    } elseif (isset($_POST['update_settings'])) {
-        $settings['cloudflare_turnstile_site_key'] = $_POST['cloudflare_turnstile_site_key'] ?? '';
-        $settings['cloudflare_turnstile_secret_key'] = $_POST['cloudflare_turnstile_secret_key'] ?? '';
+    if (isset($_POST['update_settings'])) {
+        // 對每個欄位使用 ?? 運算子，如果 POST 中不存在該值，則保留原有的設定值
+        $settings['cloudflare_turnstile_site_key'] = $_POST['cloudflare_turnstile_site_key'] ?? $settings['cloudflare_turnstile_site_key'];
+        $settings['cloudflare_turnstile_secret_key'] = $_POST['cloudflare_turnstile_secret_key'] ?? $settings['cloudflare_turnstile_secret_key'];
 
-        $settings['seo_title'] = $_POST['seo_title'] ?? '';
-        $settings['seo_description'] = $_POST['seo_description'] ?? '';
+        $settings['seo_title'] = $_POST['seo_title'] ?? $settings['seo_title'];
+        $settings['seo_description'] = $_POST['seo_description'] ?? $settings['seo_description'];
 
-        $settings['logo_link'] = $_POST['logo_link'] ?? '';
+        $settings['logo_link'] = $_POST['logo_link'] ?? $settings['logo_link'];
 
-        $settings['banner_top_link'] = $_POST['banner_top_link'] ?? '';
-        $settings['banner_bottom_link'] = $_POST['banner_bottom_link'] ?? '';
+        $settings['banner_top_link'] = $_POST['banner_top_link'] ?? $settings['banner_top_link'];
+        $settings['banner_bottom_link'] = $_POST['banner_bottom_link'] ?? $settings['banner_bottom_link'];
 
-        $settings['footer_text'] = $_POST['footer_text'] ?? '';
-        $settings['footer_link'] = $_POST['footer_link'] ?? '';
+        $settings['footer_text'] = $_POST['footer_text'] ?? $settings['footer_text'];
+        $settings['footer_link'] = $_POST['footer_link'] ?? $settings['footer_link'];
 
         $img_dir = __DIR__ . '/../img';
 
-        // 使用輔助函數處理所有圖片上傳
+        // 處理圖片上傳
         handle_image_upload($_FILES['logo_file'], 'logo', 'logo_url', $settings, $img_dir);
         handle_image_upload($_FILES['banner_top_file'], 'banner_top', 'banner_top_image', $settings, $img_dir);
         handle_image_upload($_FILES['banner_bottom_file'], 'banner_bottom', 'banner_bottom_image', $settings, $img_dir);
         handle_image_upload($_FILES['seo_og_image_file'], 'og_image', 'seo_og_image', $settings, $img_dir);
 
+        // 儲存設定並設定成功訊息
+        $newSettingsContent = '<?php die(); ?>' . json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        file_put_contents(SETTINGS_FILE, $newSettingsContent);
         $message = "設定已成功儲存！";
     }
-
-    // 在處理完所有 POST 請求後，統一寫入檔案
-    $newSettingsContent = '<?php die(); ?>' . json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    file_put_contents(SETTINGS_FILE, $newSettingsContent);
 }
 ?>
 
