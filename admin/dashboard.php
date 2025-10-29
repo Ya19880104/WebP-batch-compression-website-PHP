@@ -151,8 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings['banner_top_link'] = $_POST['banner_top_link'] ?? $settings['banner_top_link'];
         $settings['banner_bottom_link'] = $_POST['banner_bottom_link'] ?? $settings['banner_bottom_link'];
 
-        $settings['footer_text'] = $_POST['footer_text'] ?? $settings['footer_text'];
-        $settings['footer_link'] = $_POST['footer_link'] ?? $settings['footer_link'];
+        $settings['footer_html'] = $_POST['footer_html'] ?? $settings['footer_html'];
 
         $img_dir = __DIR__ . '/../img';
 
@@ -307,11 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" id="banner_bottom_link" name="banner_bottom_link" value="<?php echo htmlspecialchars($settings['banner_bottom_link']); ?>">
 
             <h2>Footer 設定</h2>
-            <label for="footer_text">Footer 文字:</label>
-            <input type="text" id="footer_text" name="footer_text" value="<?php echo htmlspecialchars($settings['footer_text']); ?>">
-
-            <label for="footer_link">Footer 連結:</label>
-            <input type="text" id="footer_link" name="footer_link" value="<?php echo htmlspecialchars($settings['footer_link']); ?>">
+            <label for="footer_html">Footer HTML:</label>
+            <textarea id="footer_html" name="footer_html" style="height: 120px;"><?php echo htmlspecialchars($settings['footer_html']); ?></textarea>
 
             <br>
             <input type="submit" name="update_settings" value="儲存設定">

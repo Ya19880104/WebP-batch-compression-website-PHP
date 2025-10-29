@@ -91,7 +91,7 @@ $settings = json_decode($jsonSettings, true);
     </div>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> <a href="<?php echo htmlspecialchars($settings['footer_link']); ?>" target="_blank"><?php echo htmlspecialchars($settings['footer_text']); ?></a>. All rights reserved.</p>
+        <p><?php echo $settings['footer_html']; ?></p>
     </footer>
 
     <script>
