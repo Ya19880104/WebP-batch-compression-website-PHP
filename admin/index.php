@@ -22,6 +22,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         }
         body {
             display: flex;
+            flex-direction: column; /* 讓 footer 可以置底 */
             justify-content: center;
             align-items: center;
         }
@@ -67,6 +68,19 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+        .footer {
+            margin-top: 30px; /* 與登入框的間距 */
+            font-size: 0.9em;
+            color: #888;
+            text-align: center;
+        }
+        .footer a {
+            color: #888;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #bbb;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +93,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
             <input type="password" name="password" id="password" required>
             <input type="submit" value="登入">
         </form>
+    </div>
+    <div class="footer">
+        <p>本系統由<a href="https://yangsheep.com.tw" target="_blank">羊羊數位科技有限公司</a>開發</p>
     </div>
 </body>
 </html>

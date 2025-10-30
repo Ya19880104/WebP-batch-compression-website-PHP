@@ -225,6 +225,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #cron-log-section + textarea {
             height: 300px;
         }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px; /* 與上方 container 的間距 */
+            font-size: 0.9em;
+            color: #888;
+        }
+        .footer a {
+            color: #888;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #bbb;
+        }
     </style>
 </head>
 <body>
@@ -343,6 +357,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <br><br>
         <a href="logout.php">登出</a>
+    </div>
+
+    <div class="footer">
+        <p>本系統由<a href="https://yangsheep.com.tw" target="_blank">羊羊數位科技有限公司</a>開發</p>
     </div>
 </body>
 </html>

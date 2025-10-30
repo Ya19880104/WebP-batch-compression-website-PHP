@@ -6,7 +6,7 @@ if (isset($_GET['session_id'])) {
 
     if (is_dir($sessionDir)) {
         $zip = new ZipArchive();
-        $zipFileName = $sessionId . '.zip';
+        $zipFileName = 'webp_' . $sessionId . '.zip';
         $zipFilePath = sys_get_temp_dir() . '/' . $zipFileName;
 
         if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
