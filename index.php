@@ -196,13 +196,6 @@ $settings = json_decode($jsonSettings, true);
                 .then(data => {
                     downloadList.innerHTML = '';
                     if (data.success) {
-                        window.addEventListener('beforeunload', () => {
-                            if (data.sessionId) {
-                                const payload = JSON.stringify({ session_id: data.sessionId });
-                                navigator.sendBeacon('cleanup.php', payload);
-                            }
-                        });
-
                         data.files.forEach(file => {
                             const item = document.createElement('div');
                             item.className = 'download-item';
