@@ -127,6 +127,7 @@ $settings = json_decode($jsonSettings, true);
             const downloadList = document.getElementById('download-list');
             const batchDownloadContainer = document.querySelector('.batch-download-container');
             let filesToUpload = [];
+            let previousSessionId = null; // 用於追蹤上一次的上傳 session
 
             uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -196,6 +197,14 @@ $settings = json_decode($jsonSettings, true);
                 .then(data => {
                     downloadList.innerHTML = '';
                     if (data.success) {
+
+                        // --- 清理上一次的 session ---
+                        if (previousSessionId) {
+                            const payload = JSON.stringify({ session_id: previousSessionId });
+                            navigator.sendBeacon('cleanup.php', payload);
+                        }
+                        previousSessionId = data.sessionId; // 更新為當前的 session ID
+
                         data.files.forEach(file => {
                             const item = document.createElement('div');
                             item.className = 'download-item';
