@@ -1,12 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../config.php';
-
-// 檢查使用者是否已登入，否則重新導向到登入頁面
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: index.php');
-    exit;
-}
 
 // 讀取目前的設定
 $rawSettings = file_get_contents(SETTINGS_FILE);
