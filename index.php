@@ -61,6 +61,7 @@ $settings = json_decode($jsonSettings, true);
                     <label><input type="radio" name="resize" value="1920"> 1920px</label>
                     <label><input type="radio" name="resize" value="600"> 600px</label>
                     <label><input type="radio" name="resize" value="600_crop"> 600px (置中裁切)</label>
+                    <label><input type="radio" name="resize" value="1200x630_crop"> 1200x630 (社群媒體)</label>
                 </div>
             </div>
 
