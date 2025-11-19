@@ -61,6 +61,7 @@ $settings = json_decode($jsonSettings, true);
                     <label><input type="radio" name="resize" value="1920"> 1920px</label>
                     <label><input type="radio" name="resize" value="600"> 600px</label>
                     <label><input type="radio" name="resize" value="600_crop"> 600px (置中裁切)</label>
+                    <label><input type="radio" name="resize" value="1200x630_crop"> 1200x630 (社群媒體)</label>
                 </div>
             </div>
 
@@ -127,6 +128,7 @@ $settings = json_decode($jsonSettings, true);
             const downloadList = document.getElementById('download-list');
             const batchDownloadContainer = document.querySelector('.batch-download-container');
             let filesToUpload = [];
+            let previousSessionId = null; // 用於追蹤上一次的上傳 session
 
             uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -196,12 +198,13 @@ $settings = json_decode($jsonSettings, true);
                 .then(data => {
                     downloadList.innerHTML = '';
                     if (data.success) {
-                        window.addEventListener('beforeunload', () => {
-                            if (data.sessionId) {
-                                const payload = JSON.stringify({ session_id: data.sessionId });
-                                navigator.sendBeacon('cleanup.php', payload);
-                            }
-                        });
+
+                        // --- 清理上一次的 session ---
+                        if (previousSessionId) {
+                            const payload = JSON.stringify({ session_id: previousSessionId });
+                            navigator.sendBeacon('cleanup.php', payload);
+                        }
+                        previousSessionId = data.sessionId; // 更新為當前的 session ID
 
                         data.files.forEach(file => {
                             const item = document.createElement('div');

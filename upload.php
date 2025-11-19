@@ -92,49 +92,81 @@ if ($turnstile_verified && isset($_FILES['images'])) {
                 // --- 核心圖片處理邏輯 ---
                 if ($resizeMode !== 'none') {
                     if ($resizeMode === '600_crop') {
-                        // --- 置中裁切 ---
+                        // --- 600px 置中裁切 (正方形) ---
                         $cropSize = min($width, $height);
-                        $cropX = ($width > $cropSize) ? ($width - $cropSize) / 2 : 0;
-                        $cropY = ($height > $cropSize) ? ($height - $cropSize) / 2 : 0;
+                        $cropX = ($width - $cropSize) / 2;
+                        $cropY = ($height - $cropSize) / 2;
 
                         $croppedImage = imagecrop($image, ['x' => $cropX, 'y' => $cropY, 'width' => $cropSize, 'height' => $cropSize]);
                         if ($croppedImage !== FALSE) {
                             imagedestroy($image);
                             $image = $croppedImage;
-                            // 更新尺寸以便後續縮放
-                            $width = $cropSize;
-                            $height = $cropSize;
+                            $width = $height = $cropSize; // 更新尺寸
                         }
-                        $targetSize = 600;
+
+                        // 縮放到 600x600
+                        $resizedImage = imagecreatetruecolor(600, 600);
+                        imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, 600, 600, $width, $height);
+                        imagedestroy($image);
+                        $image = $resizedImage;
+
+                    } elseif ($resizeMode === '1200x630_crop') {
+                        // --- 1200x630 置中裁切 (社群媒體) ---
+                        $targetWidth = 1200;
+                        $targetHeight = 630;
+                        $targetRatio = $targetWidth / $targetHeight;
+                        $originalRatio = $width / $height;
+
+                        if ($originalRatio > $targetRatio) {
+                            // 原始圖片比較寬，以高度為基準縮放
+                            $newHeight = $targetHeight;
+                            $newWidth = $newHeight * $originalRatio;
+                        } else {
+                            // 原始圖片比較高或比例相同，以寬度為基準縮放
+                            $newWidth = $targetWidth;
+                            $newHeight = $newWidth / $originalRatio;
+                        }
+
+                        // 先縮放以完全覆蓋目標尺寸
+                        $scaledImage = imagecreatetruecolor($newWidth, $newHeight);
+                        imagecopyresampled($scaledImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+                        // 計算置中裁切的起始點
+                        $cropX = ($newWidth - $targetWidth) / 2;
+                        $cropY = ($newHeight - $targetHeight) / 2;
+
+                        // 進行裁切
+                        $croppedImage = imagecrop($scaledImage, ['x' => $cropX, 'y' => $cropY, 'width' => $targetWidth, 'height' => $targetHeight]);
+                        if ($croppedImage !== FALSE) {
+                            imagedestroy($image);
+                            imagedestroy($scaledImage);
+                            $image = $croppedImage;
+                        }
+
                     } else {
-                        // --- 等比例縮放 ---
+                        // --- 一般等比例縮放 ---
                         $targetSize = (int)$resizeMode;
-                    }
+                        if (($targetSize > 0) && ($width > $targetSize || $height > $targetSize)) {
+                             $ratio = $width / $height;
+                             if ($ratio > 1) { // 橫向
+                                 $newWidth = $targetSize;
+                                 $newHeight = $targetSize / $ratio;
+                             } else { // 直向或方形
+                                 $newHeight = $targetSize;
+                                 $newWidth = $targetSize * $ratio;
+                             }
 
-                    if (($targetSize > 0) && ($width > $targetSize || $height > $targetSize || $resizeMode === '600_crop')) {
-                         $ratio = $width / $height;
-                         if ($ratio > 1) { // 橫向
-                             $newWidth = $targetSize;
-                             $newHeight = $targetSize / $ratio;
-                         } else { // 直向或方形
-                             $newHeight = $targetSize;
-                             $newWidth = $targetSize * $ratio;
-                         }
-                         if($resizeMode === '600_crop'){ // 裁切後強制為正方形
-                             $newWidth = $targetSize;
-                             $newHeight = $targetSize;
-                         }
-
-                         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-                         if ($fileExtension == 'png') {
-                             imagealphablending($resizedImage, false);
-                             imagesavealpha($resizedImage, true);
-                             $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
-                             imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
-                         }
-                         imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-                         imagedestroy($image);
-                         $image = $resizedImage;
+                             $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+                             if ($fileExtension == 'png') {
+                                 imagealphablending($resizedImage, false);
+                                 imagesavealpha($resizedImage, true);
+                                 $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                                 imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+                             }
+                             imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                             imagedestroy($image);
+                             $image = $resizedImage;
+                        }
                     }
                 }
 

@@ -32,7 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($loginSuccess) {
         // 登入成功，設定 session
+        session_regenerate_id(true); // 防禦 session fixation 攻擊
         $_SESSION['loggedin'] = true;
+        $_SESSION['last_activity'] = time(); // 記錄活動時間
         header('Location: dashboard.php');
         exit;
     } else {
